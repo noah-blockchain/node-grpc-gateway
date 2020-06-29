@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+import "protoc-gen-swagger/options/annotations.proto";
+import "google/rpc/status.proto";
+
+package api_pb;
+
+option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
+    info: {
+        title: "Noah Node API v2"
+        license: {
+            name: "MIT"
+            url: 'https://github.com/noah-blockchain/noah-go-node/blob/master/LICENSE'
+        };
+        version: "1.1"
+        contact: {
+            name: "Godev Lion"
+            url: "https://github.com/godevlion"
+            email: "godevlion@yandprotonex.rfuiu"
+        };
+    };
+    schemes: [HTTP,HTTPS]
+    consumes: "application/json"
+    produces: "application/json"
+    responses: {
+        key: "default"
+        value: {
+            description: ""
+            schema: {
+                json_schema: {
+                    ref: ".google.rpc.Status"
+                };
+            };
+        };
+    };
+};
+
