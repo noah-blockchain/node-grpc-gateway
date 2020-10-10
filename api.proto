@@ -1,12 +1,12 @@
 syntax = "proto3";
 
+package api_pb;
+
+option go_package = "./api_pb";
+
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/struct.proto";
-
-package api_pb;
-
-option go_package = ".;api_pb";
 
 message NodeInfo {
     message ProtocolVersion {
@@ -74,7 +74,6 @@ message StatusResponse {
     string latest_block_height = 3;
     string latest_block_time = 4;
     string keep_last_states = 5;
-    string total_slashed = 10;
     bool catching_up = 6;
     string public_key = 7;
     string node_id = 9;
@@ -109,17 +108,7 @@ message MinGasPriceResponse {
 }
 
 message BlockRequest {
-    uint64 height = 1;
-    enum Field {
-        transactions = 0;
-        missed = 1;
-        block_reward = 2;
-        size = 3;
-        proposer = 4;
-        validators = 5;
-        evidence = 6;
-    }
-    repeated Field fields = 2;
+    int64 height = 1;
 }
 message BlockResponse {
     string hash = 1;
@@ -163,11 +152,10 @@ message BlockResponse {
         repeated Evidence evidence = 1;
     }
     Evidence evidence = 11;
-    repeated string missed = 12;
 }
 
 message MaxGasRequest {
-    uint64 height = 1;
+    int32 height = 1;
 }
 message MaxGasResponse {
     string max_gas = 3;
@@ -175,63 +163,35 @@ message MaxGasResponse {
 
 message AddressRequest {
     string address = 1;
-    uint64 height = 2;
-    bool delegated = 4;
-    reserved "frozen", "total";
-}
-message AddressBalance {
-    string value = 2;
-    string noah_value = 3;
-}
-
-message AddressDelegatedBalance {
-    string value = 2;
-    string noah_value = 3;
-    string delegate_noah_value = 4;
+    int32 height = 2;
 }
 message AddressResponse {
-    map<string, AddressBalance> balance = 1;
-    map<string, AddressDelegatedBalance> delegated = 3;
-    map<string, AddressBalance> total = 4;
+    map<string, string> balance = 1;
     string transactions_count = 2;
-    string noah_value = 5;
 }
 
 message AddressesRequest {
     repeated string addresses = 1;
-    uint64 height = 2;
-    bool delegated = 4;
-    reserved "frozen", "total";
+    int32 height = 2;
 }
 message AddressesResponse {
     message Result {
-        map<string, AddressBalance> balance = 2;
-        map<string, AddressDelegatedBalance> delegated = 6;
-        map<string, AddressBalance> total = 4;
+        string address = 1;
+        map<string, string> balance = 2;
         string transactions_count = 3;
-        string noah_value = 5;
     }
-    map<string, Result> addresses = 3;
+    repeated Result addresses = 3;
 }
 
-enum CandidateStatus {
-    _ = 0;
-    CandidateOff = 1;
-    CandidateOn = 2;
-    ValidatorOn = 3;
-}
 message CandidateRequest {
     string public_key = 1;
-    uint64 height = 2;
+    int32 height = 2;
 }
 message CandidateResponse {
     string reward_address = 1;
     string total_stake = 2;
     string public_key = 3;
     string commission = 4;
-    string used_slots = 7;
-    string uniq_users = 8;
-    string min_stake = 9;
     message Stake {
         string owner = 1;
         string coin = 2;
@@ -243,17 +203,15 @@ message CandidateResponse {
 }
 
 message CandidatesRequest {
-    uint64 height = 1;
+    int32 height = 1;
     bool include_stakes = 2;
-    CandidateStatus status = 3;
-
 }
 message CandidatesResponse {
     repeated CandidateResponse candidates = 3;
 }
 
 message CoinInfoRequest {
-    uint64 height = 1;
+    int32 height = 1;
     string symbol = 2;
 }
 message CoinInfoResponse {
@@ -308,7 +266,7 @@ message EstimateCoinBuyRequest {
     string coin_to_buy = 1;
     string coin_to_sell = 2;
     string value_to_buy = 3;
-    uint64 height = 4;
+    int32 height = 4;
 }
 message EstimateCoinBuyResponse {
     string will_pay = 1;
@@ -319,7 +277,7 @@ message EstimateCoinSellRequest {
     string coin_to_sell = 1;
     string coin_to_buy = 2;
     string value_to_sell = 3;
-    uint64 height = 4;
+    int32 height = 4;
 }
 message EstimateCoinSellResponse {
     string will_get = 1;
@@ -334,46 +292,19 @@ message EstimateCoinSellAllRequest {
     string coin_to_buy = 2;
     string value_to_sell = 3;
     uint64 gas_price = 4;
-    uint64 height = 5;
+    int32 height = 5;
 }
 
 message EstimateTxCommissionResponse {
     string commission = 1;
 }
 message EstimateTxCommissionRequest {
-    message TransactionData {
-        string gas_coin = 3;
-        enum Type {
-            _ = 0;
-            Send = 1;
-            SellCoin = 2;
-            SellAllCoin = 3;
-            BuyCoin = 4;
-            CreateCoin = 5;
-            DeclareCandidacy = 6;
-            Delegate = 7;
-            Unbond = 8;
-            RedeemCheck = 9;
-            SetCandidateOnline = 10;
-            SetCandidateOffline = 11;
-            CreateMultisig = 12;
-            Multisend = 13;
-            EditCandidate = 14;
-        }
-        Type type = 4;
-        bytes payload = 5;
-        int64 mtxs = 6;
-    }
-    oneof Transaction {
-        string tx = 1;
-        TransactionData data = 3;
-    }
-    uint64 height = 2;
+    string tx = 1;
+    int32 height = 2;
 }
 
 message EventsRequest {
-    uint64 height = 1;
-    repeated string search = 2;
+    uint32 height = 1;
 }
 message EventsResponse {
     message Event {
@@ -385,7 +316,7 @@ message EventsResponse {
 
 message MissedBlocksRequest {
     string public_key = 1;
-    uint64 height = 2;
+    int32 height = 2;
 }
 message MissedBlocksResponse {
     string missed_blocks = 1;
@@ -403,7 +334,7 @@ message UnconfirmedTxsRequest {
 }
 
 message ValidatorsRequest {
-    uint64 height = 1;
+    int64 height = 1;
     int32 page = 2;
     int32 per_page = 3;
 }
@@ -418,6 +349,7 @@ message ValidatorsResponse {
 message SubscribeRequest {
     string query = 1;
 }
+
 message SubscribeResponse {
     string query = 1;
     google.protobuf.Struct data = 2;
@@ -428,207 +360,128 @@ message SubscribeResponse {
     repeated Event events = 3;
 }
 
-message HaltsRequest {
-    uint64 height = 1;
-}
-message HaltsResponse {
-    repeated string votes = 1;
-}
-
-message FrozenRequest {
-    string address = 1;
-    string coin = 2;
-}
-message FrozenResponse {
-    message Frozen {
-        string height = 1;
-        string address = 2;
-        string candidate_key = 3;
-        string coin = 4;
-        string value = 5;
-    }
-    repeated Frozen frozen = 1;
-}
-
-message StakesRequest {
-    string public_key = 1;
-    string coin = 2;
-    string address = 3;
-    uint64 height = 4;
-}
-message StakesResponse {
-    message Stake {
-        string address = 1;
-        string pub_key = 2;
-        string coin = 3;
-        string value = 4;
-        string noah_value = 5;
-    }
-    repeated Stake stakes = 1;
-}
 
 service ApiService {
-    //Subscribe returns a subscription for events by query.
     rpc Subscribe (SubscribeRequest) returns (stream SubscribeResponse) {
         option (google.api.http) = {
             get: "/subscribe"
         };
     }
-    //Halts
-    rpc Halts (HaltsRequest) returns (HaltsResponse) {
-        option (google.api.http) = {
-            get: "/halts"
-        };
-    }
-    //Genesis returns genesis file.
+
     rpc Genesis (google.protobuf.Empty) returns (GenesisResponse) {
         option (google.api.http) = {
             get: "/genesis"
         };
     }
-    //MinGasPrice returns current min gas price.
     rpc MinGasPrice (google.protobuf.Empty) returns (MinGasPriceResponse) {
         option (google.api.http) = {
             get: "/min_gas_price"
         };
     }
-    //NetInfo returns network info
     rpc NetInfo (google.protobuf.Empty) returns (NetInfoResponse) {
         option (google.api.http) = {
             get: "/net_info"
         };
     }
-    //Status returns node status including pubkey, latest block.
     rpc Status (google.protobuf.Empty) returns (StatusResponse) {
         option (google.api.http) = {
             get: "/status"
         };
     }
-    //Address returns coins list, balance and transaction count of an address.
     rpc Address (AddressRequest) returns (AddressResponse) {
         option (google.api.http) = {
             get: "/address/{address}"
         };
     }
-    //Addresses returns list of addresses.
     rpc Addresses (AddressesRequest) returns (AddressesResponse) {
         option (google.api.http) = {
             get: "/addresses"
         };
     }
-    //Block returns block data at given height.
     rpc Block (BlockRequest) returns (BlockResponse) {
         option (google.api.http) = {
             get: "/block/{height}"
         };
     }
-    //Candidate returns candidate’s info by provided public_key. It will respond with 404 code if candidate is not found.
     rpc Candidate (CandidateRequest) returns (CandidateResponse) {
         option (google.api.http) = {
             get: "/candidate/{public_key}"
         };
     }
-    //Candidates returns list of candidates.
     rpc Candidates (CandidatesRequest) returns (CandidatesResponse) {
         option (google.api.http) = {
             get: "/candidates"
         };
     }
-    //CoinInfo returns information about coin. Note: this method does not return information about base coins (qNOAH and NOAH).
     rpc CoinInfo (CoinInfoRequest) returns (CoinInfoResponse) {
         option (google.api.http) = {
             get: "/coin_info/{symbol}"
         };
     }
-    //EstimateCoinBuy return estimate of buy coin transaction.
     rpc EstimateCoinBuy (EstimateCoinBuyRequest) returns (EstimateCoinBuyResponse) {
         option (google.api.http) = {
             get: "/estimate_coin_buy"
         };
     }
-    //EstimateCoinSell return estimate of sell coin transaction.
     rpc EstimateCoinSell (EstimateCoinSellRequest) returns (EstimateCoinSellResponse) {
         option (google.api.http) = {
             get: "/estimate_coin_sell"
         };
     }
-    //EstimateCoinSellAll return estimate of sell all coin transaction.
     rpc EstimateCoinSellAll (EstimateCoinSellAllRequest) returns (EstimateCoinSellAllResponse) {
         option (google.api.http) = {
             get: "/estimate_coin_sell_all"
         };
     }
-    //EstimateTxCommission return estimate of transaction.
     rpc EstimateTxCommission (EstimateTxCommissionRequest) returns (EstimateTxCommissionResponse) {
         option (google.api.http) = {
             get: "/estimate_tx_commission/{tx}"
-            additional_bindings {
-                get: "/estimate_tx_commission"
-            }
         };
     }
-    //Events returns events at given height.
     rpc Events (EventsRequest) returns (EventsResponse) {
         option (google.api.http) = {
             get: "/events/{height}"
         };
     }
-    //MaxGas returns current max gas.
     rpc MaxGas (MaxGasRequest) returns (MaxGasResponse) {
         option (google.api.http) = {
             get: "/max_gas"
         };
     }
-    //MissedBlocks returns missed blocks by validator public key.
     rpc MissedBlocks (MissedBlocksRequest) returns (MissedBlocksResponse) {
         option (google.api.http) = {
             get: "/missed_blocks/{public_key}"
         };
     }
-    //SendTransaction returns the result of sending signed tx. To ensure that transaction was successfully committed to the blockchain, you need to find the transaction by the hash and ensure that the status code equals to 0.
-    rpc SendTransaction (SendTransactionRequest) returns (SendTransactionResponse) {
+    rpc SendGetTransaction (SendTransactionRequest) returns (SendTransactionResponse) {
         option (google.api.http) = {
             get: "/send_transaction/{tx}"
-            additional_bindings {
-                post: "/send_transaction"
-                body: "*"
-            }
         };
     }
-    //Transaction returns transaction info.
+    rpc SendPostTransaction (SendTransactionRequest) returns (SendTransactionResponse) {
+        option (google.api.http) = {
+            post: "/send_transaction"
+            body: "*"
+        };
+    }
     rpc Transaction (TransactionRequest) returns (TransactionResponse) {
         option (google.api.http) = {
             get: "/transaction/{hash}"
         };
     }
-    //Transactions return transactions by query.
     rpc Transactions (TransactionsRequest) returns (TransactionsResponse) {
         option (google.api.http) = {
             get: "/transactions"
         };
     }
-    //UnconfirmedTxs returns unconfirmed transactions.
     rpc UnconfirmedTxs (UnconfirmedTxsRequest) returns (UnconfirmedTxsResponse) {
         option (google.api.http) = {
             get: "/unconfirmed_txs"
         };
     }
-    //Validators returns list of active validators.
     rpc Validators (ValidatorsRequest) returns (ValidatorsResponse) {
         option (google.api.http) = {
             get: "/validators"
         };
-    }
-    //Validators returns frozen balance.
-    rpc Frozen (FrozenRequest) returns (FrozenResponse) {
-        option (google.api.http) = {
-            get: "/frozen"
-        };
-    }
-    //Stakes
-    rpc Stakes (StakesRequest) returns (StakesResponse) {
-        option (google.api.http) = {
-                get: "/stakes/{public_key}"
-            };
     }
 }
